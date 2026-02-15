@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Liquidity Predictor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* ----- 1. RESET & FULL HEIGHT (For Centering) ----- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%; /* Zaroori hai vertical center ke liye */
+            width: 100%;
+            overflow: hidden; /* Scrollbars hatane ke liye */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+            /* ----- 2. FLEXBOX CENTERING ----- */
+            display: flex;
+            justify-content: center; 
+            align-items: center;     /* Vertical Center */
+            
+            /* ----- 3. BACKGROUND IMAGE FIX ----- */
+            /* Flask static folder se image uthayega */
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('/static/stockBG.jpg'); 
+            
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* ----- 4. GLASS CONTAINER ----- */
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background-color: rgba(255, 255, 255, 0.1); /* Glass effect */
+            backdrop-filter: blur(15px);                /* Blur effect */
+            -webkit-backdrop-filter: blur(15px);
+            
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 380px;
+            text-align: center;
+            max-width: 90%;
+            
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); /* Deep Shadow */
+            
+            color: white; /* Text white kyunki background dark hai */
+            animation: floatUp, 0.5s ,ease-in-out;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        /* ----- FORM INPUTS ----- */
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            color: #ddd; 
+            font-size: 0.9rem; 
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus { 
+            outline: none; 
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        /* ----- BUTTONS ----- */
+        .btn-predict {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .btn-predict:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,255,100,0.3); }
+
+        .btn-auto {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+        .btn-auto:hover { background: rgba(255,255,255,0.3); }
+
+        /* ----- RESULT BOX ----- */
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s;
+        }
+        .success { border-left: 5px solid #2ecc71; color: #2ecc71; }
+        .danger { border-left: 5px solid #e74c3c; color: #e74c3c; }
+
+        @keyframes floatUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🚀 Crypto AI</h2>
+        
+        <button type="button" class="btn-auto" onclick="fillDemoData()">
+            ⚡ Auto-Fill Demo Data
+        </button>
+
+        <form action="/predict" method="POST">
+            <div class="form-group">
+                <label>Current Price ($)</label>
+                <input type="number" step="any" name="price" placeholder="45000" required>
+            </div>
+            
+            <div class="form-group">
+                <label>24h Volume ($)</label>
+                <input type="number" step="any" name="vol_24h" placeholder="1500000" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Market Cap ($)</label>
+                <input type="number" step="any" name="mkt_cap" placeholder="50000000" required>
+            </div>
+
+            <button type="submit" class="btn-predict">PREDICT LIQUIDITY</button>
+        </form>
+
+        {% if prediction_text %}
+        <div class="result-box {{ css_class }}">
+            <h3 style="margin:0">{{ prediction_text }}</h3>
+            <p style="margin-top:5px; color:white; font-size:0.9rem">{{ prob_text }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function fillDemoData() {
+            document.getElementsByName('price')[0].value = (Math.random() * 50000 + 100).toFixed(2);
+            document.getElementsByName('vol_24h')[0].value = (Math.random() * 100000000 + 50000).toFixed(2);
+            document.getElementsByName('mkt_cap')[0].value = (Math.random() * 500000000 + 1000000).toFixed(2);
+        }
+    </script>
+
+</body>
+</html>

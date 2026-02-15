@@ -1,0 +1,18 @@
+# Virtual Environment (Bahut heavy hota hai, upload mat karna)
+venv/
+env/
+
+# Python Compiled Files (Ye automatic banti hain, zaroorat nahi)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Mac System Files (Agar Mac use kar rahe ho)
+.DS_Store
+
+# Flask Instance Folder (Sensitive data ho sakta hai)
+instance/
+
+# Pytest Cache (Agar testing ki ho)
+.pytest_cache/
