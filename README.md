@@ -32,6 +32,9 @@ During analysis, we found that **Trading Volume** has the highest correlation wi
 ### 5 Distribution of Liquidity_ratio
 ![distributionPlot](./Screenshots/Liquidity.png)
 
+### 6  Relationship between all the features 
+![all_Scatter](./Screenshots/al_scatter.png)
+
 ## 🛠 Tech Stack
 - **Frontend:** HTML, CSS (Glassmorphism UI), JavaScript
 - **Backend:** Flask (Python)
