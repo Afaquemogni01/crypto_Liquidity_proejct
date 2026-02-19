@@ -3,7 +3,9 @@ import numpy as np
 import joblib
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+    static_folder=os.path.abspath("static"),
+    static_url_path="/static")
 
 # ==========================================
 # 🔥 NEW: DISABLE BROWSER CACHE (Ye Add Karo)
